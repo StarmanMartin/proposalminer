@@ -1,0 +1,12 @@
+[base]
+periode = 300
+
+[chemotion]
+url = "http://localhost:3000"
+user = "XXX"
+password = "*****"
+
+[proposal]
+url = "https://proposal.knmf.kit.edu/"
+user = "****@kit.edu"
+password = "****"

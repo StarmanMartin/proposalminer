@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ProposalMiner.iml" filepath="$PROJECT_DIR$/ProposalMiner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../chemotionapi/.idea/chemotionapi.iml" filepath="$PROJECT_DIR$/../chemotionapi/.idea/chemotionapi.iml" />
+    </modules>
+  </component>
+</project>

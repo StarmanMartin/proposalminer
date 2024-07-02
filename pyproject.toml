@@ -9,10 +9,13 @@ packages = [{include = "chemotion_api"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-requests = "^2.31.0"
-chemotion-api = {path = "libs/chemotion_api-0.3.6.tar.gz"}
-django = "^5.0.2"
+requests = "^2.32.3"
+chemotion-api = "^0.3.30"
+django = "^5.0.6"
 beautifulsoup4 = "^4.12.3"
+pandas = "^2.2.2"
+xlrd = "^2.0.1"
+psycopg2 = "^2.9.9"
 
 
 [build-system]

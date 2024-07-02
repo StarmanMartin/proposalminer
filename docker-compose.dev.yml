@@ -1,0 +1,14 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+    image: mstarman/knmfproposalminer:0.1.0
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    ports:
+      - 3211:80
+volumes:
+  bridge_db:

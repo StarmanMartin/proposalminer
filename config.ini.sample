@@ -1,12 +1,19 @@
 [base]
-periode = 300
+periode=300
+mode=%(MODE)s
 
 [chemotion]
-url = "http://localhost:3000"
-user = "XXX"
-password = "*****"
+url=%(CHEMOTION_URL)s
+user_name=%(CHEMOTION_USER)s
+password=%(CHEMOTION_PASSWORD)s
+
+db_name=%(CHEMOTION_DB_NAME)s
+db_host=%(CHEMOTION_DB_HOST)s
+db_user=%(CHEMOTION_DB_USER)s
+db_password=%(CHEMOTION_DB_PASSWORD)s
+db_port=%(CHEMOTION_DB_PORT)s
 
 [proposal]
-url = "https://proposal.knmf.kit.edu/"
-user = "****@kit.edu"
-password = "****"
+url=%(PROPOSAL_URL)s
+user=%(PROPOSAL_USER)s
+password=%(PROPOSAL_PASSWORD)s

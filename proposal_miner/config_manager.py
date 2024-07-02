@@ -3,6 +3,16 @@ import os
 from collections.abc import MutableMapping
 
 
+class ConfigSet(dict):
+
+    def __init__(self, config, section_name):
+        super().__init__()
+        self._config = config
+        self._section_name = section_name
+    def __getitem__(self, item):
+        return self._config.get(self._section_name, item, vars=os.environ)
+
+
 class Config(MutableMapping):
     _instance = None
     config = None
@@ -15,12 +25,12 @@ class Config(MutableMapping):
     def read(self, path: str):
         if self.config is None:
             self.config = configparser.ConfigParser()
+            self.config.read(path)
         if not os.path.exists(path):
             raise FileNotFoundError(f'The config INI file {path} does not exist!')
-        self.config.read(path)
 
-    def __getitem__(self, item: str) -> configparser.SectionProxy:
-        return self.config.__getitem__(item)
+    def __getitem__(self, item: str) -> ConfigSet:
+        return ConfigSet(self.config, item)
 
     def __setitem__(self, *args, **kwargs):
         return self.config.__setitem__(*args, **kwargs)

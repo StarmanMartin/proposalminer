@@ -1,2 +1,3 @@
 /config.ini
 /proposal_miner/proposal.sqlite3
+/.env

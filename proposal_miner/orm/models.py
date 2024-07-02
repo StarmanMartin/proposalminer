@@ -3,7 +3,7 @@ from django.db.models import Max
 
 
 class Proposal(models.Model):
-    proposal_id = models.CharField(max_length=255)  # required max_length
+    proposal_id = models.CharField(max_length=255, null=True)  # required max_length
     proposal_key = models.CharField(max_length=255)  # required max_length
     name = models.CharField(max_length=255, null=True, default=None)  # required max_length
     group = models.IntegerField(null=True, default=None)

@@ -4,8 +4,6 @@ services:
     build:
       context: .
     image: mstarman/knmfproposalminer:0.1.0
-    depends_on:
-      - db
     env_file:
       - ./.env
     ports:

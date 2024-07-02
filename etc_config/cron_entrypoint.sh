@@ -1,5 +1,5 @@
  #!/bin/bash
 
- export $(xargs < /srv/app/.env)
+ export $(xargs -0 < /srv/app/.env)
 
- /usr/local/bin/python /srv/app/manage.py run_scheduled_processes
+ /usr/local/bin/python /srv/app/__main__.py

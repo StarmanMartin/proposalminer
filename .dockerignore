@@ -1,0 +1,12 @@
+.env.sample
+.env
+README.md
+proposal_miner/proposal.sqlite3
+Dockerfile
+docker-compose.yml
+.gitignore
+poetry.lock
+package.json
+ProposalMiner.iml
+.tool-versions
+.idea

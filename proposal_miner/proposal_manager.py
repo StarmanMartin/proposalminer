@@ -73,14 +73,12 @@ class ProposalManager:
 
         data = [f"{k}={v}" for k,v in {'status': 'VALIDATED', 'order': 'desc'}.items()] + all_calls
 
-        #res = self.session.get(f'{self._url}/proposal/exportAsExcel?{"&".join(data)}')
-        #if res.status_code != 200:
-        #    raise ConnectionError(f"Login failed! {res.status_code} => {res.text}")
-        #filename = next(x.split('filename=')[-1] for x in res.headers['Content-disposition'].split(';') if 'filename=' in x)
-        #with open(filename, 'wb+') as f:
-        #    f.write(res.content)
-
-        filename = '/home/martint/dev/KIT/ProposalMiner/proposal_miner/proposal-overview.xls'
+        res = self.session.get(f'{self._url}/proposal/exportAsExcel?{"&".join(data)}')
+        if res.status_code != 200:
+            raise ConnectionError(f"Login failed! {res.status_code} => {res.text}")
+        filename = next(x.split('filename=')[-1] for x in res.headers['Content-disposition'].split(';') if 'filename=' in x)
+        with open(filename, 'wb+') as f:
+            f.write(res.content)
 
         exel_content = read_excel(filename)
         for (i,x) in exel_content.iterrows():

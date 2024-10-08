@@ -2,17 +2,22 @@ import configparser
 import json
 import os.path
 import re
+import tempfile
 
 import math
 
 import requests
 from bs4 import BeautifulSoup
-from pandas import read_excel
+from chemotion_api import ResearchPlan
+from pandas import read_excel, Timestamp
 
-from orm.models import Call
+from orm.models import Call, Report
+from proposal_miner.utils import panda_json_serial
 
 
 class ProposalManager:
+
+    pdf_directory = os.path.join(os.path.dirname(__file__), 'pdfs')
 
     def __init__(self, config: configparser.ConfigParser):
         self._config = config
@@ -49,6 +54,7 @@ class ProposalManager:
         res = self.session.get(f'{self._url}/auth/changeActiveRole?newRole={role}')
         if res.status_code != 200:
             raise ConnectionError(f"Request failed! {res.status_code} => {res.text}")
+
     def get_all_calls(self):
         self._change_role_to_scientist()
         res = self.session.get(f'{self._url}/proposalCalendar/index')
@@ -64,6 +70,34 @@ class ProposalManager:
         options = select.find_all('option')
         return [int(option['value']) for option in options]
 
+    def get_app_status_reports(self):
+        latest_call = Call.latest_call()
+        all_calls = [f'proposalcallnumber={x}' for x in self.get_all_calls() if x > latest_call]
+        self._change_role_to_api()
+        data = [f"{k}={v}" for k,v in {'order': 'desc'}.items()] + all_calls
+        res = self.session.get(f'{self._url}/statusReport/export?{"&".join(data)}')
+        if res.status_code != 200:
+            raise ConnectionError(f"Login failed! {res.status_code} => {res.text}")
+        filename = next(x.split('filename=')[-1] for x in res.headers['Content-disposition'].split(';') if 'filename=' in x)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filename = os.path.join(tmpdirname, filename)
+            with open(filename, 'wb+') as f:
+                f.write(res.content)
+            exel_content = read_excel(filename)
+
+        for (i,x) in exel_content.iterrows():
+            date_time_stamp = x.get('Date').value
+            proposal_id = x.get('Proposal ID')
+            technology = x.get('Technology')
+            m, c = Report.objects.get_or_create(proposal_id=proposal_id, date=date_time_stamp, technology=technology)
+            if c:
+                rep_dict = {}
+                for k,v in x.to_dict().items():
+                    rep_dict[k] = panda_json_serial(v)
+
+                m.data = rep_dict
+                m.save()
+
     def get_all_proposals(self):
         latest_call = Call.latest_call()
         all_calls = [f'proposalcallnumber={x}' for x in self.get_all_calls() if x > latest_call]
@@ -77,10 +111,13 @@ class ProposalManager:
         if res.status_code != 200:
             raise ConnectionError(f"Login failed! {res.status_code} => {res.text}")
         filename = next(x.split('filename=')[-1] for x in res.headers['Content-disposition'].split(';') if 'filename=' in x)
-        with open(filename, 'wb+') as f:
-            f.write(res.content)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filename = os.path.join(tmpdirname, filename)
+            with open(filename, 'wb+') as f:
+                f.write(res.content)
 
-        exel_content = read_excel(filename)
+            exel_content = read_excel(filename)
+
         for (i,x) in exel_content.iterrows():
             reference_key = x.get('Proposal ID')
 
@@ -131,3 +168,17 @@ class ProposalManager:
     def get_emails_for_technology(self, technology):
         technology = re.sub(r'[ _\-]', '', technology).lower()
         return self.technology_emails.get(technology, [])
+
+    def download_pdf(self, proposal_id: str) -> str:
+        self._change_role_to_api()
+        url = f"{self._url}/proposal/pdf/{proposal_id}"
+        res = self.session.get(url)
+        if res.status_code != 200:
+            raise ConnectionError(f"Load failed Proposal PDF {proposal_id}! {res.status_code} => {res.text}")
+        filename = next(x.split('filename=')[-1] for x in res.headers['Content-disposition'].split(';') if 'filename=' in x)
+        filename = filename.strip('"\'')
+        os.makedirs(self.pdf_directory, exist_ok=True)
+        filename = os.path.join(self.pdf_directory, filename)
+        with open(filename, 'wb+') as f:
+            f.write(res.content)
+        return filename

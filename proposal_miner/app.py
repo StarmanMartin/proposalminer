@@ -9,12 +9,12 @@ setup()
 from chemotion_manager import Chemotion
 from config_manager import Config
 
-from orm.models import Proposal, Call
+from orm.models import Proposal, Call, Report
 
 from proposal_manager import ProposalManager
 
 FORMAT = '%(asctime)s %(message)s'
-logging.basicConfig(format=FORMAT)
+logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler()], format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +28,9 @@ def run(config_path: str):
     logger.info('Successfully, logged in to Proposal Manager')
     call_list = set()
     pm.get_all_technology_user()
-    logger.info('Fetched all Technology user')
+    logger.info('Fetching all Technology user')
+    pm.get_app_status_reports()
+    logger.info('Fetching new Proposals')
     for prop_data in pm.get_all_proposals():
         (prop, created) = Proposal.objects.get_or_create(proposal_key=prop_data['referenceKey'])
         if created:
@@ -38,6 +40,7 @@ def run(config_path: str):
             emails = [prop_data['email']] + prop_data['co_ops']
             for technology in prop_data['technologies']:
                 emails += pm.get_emails_for_technology(technology)
+            # emails += ['martin.starman@kit.edu']
             user = chemotion.get_all_user()
             user = [user[email] for email in emails if email in user]
             logger.info('Selected user: [%s]', ','.join([str(x) for x in user]))
@@ -52,17 +55,41 @@ def run(config_path: str):
                 rs_1.add_richtext(f'Keywords: {prop_data["keywords"]}')
                 rs_1.add_richtext(prop_data["text"])
                 table = rs_1.add_table()
-                table['value']['columns'] = table['value']['columns'][:2]
-                table['value']['columns'][0]['headerName'] = 'E-Mail'
-                table['value']['columns'][1]['headerName'] = 'Technology'
-                table['value']['rows'] = []
+                table.add_columns('E-Mail', 'Technology')
                 for technology in prop_data['technologies']:
                     for email in pm.get_emails_for_technology(technology):
-                        table['value']['rows'].append({'a': email, 'b': technology})
+                        table.add_row(email, technology)
+                pdf_path = pm.download_pdf(prop.proposal_key)
+                rs_1.attachments.add_file(pdf_path)
                 rs_1.save()
                 prop.collection = col.id
+                prop.research_plan = rs_1.id
                 prop.save()
-                logger.info('Proposal done!')
+
+    logger.info('Proposal done!')
+    logger.info('Fetching Proposal Reports!')
+    for prop in Proposal.objects.all():
+        if prop.research_plan is not None:
+            rs_1 = chemotion.get_rp(prop)
+            reports = Report.objects.filter(synced=False, proposal_id=prop.proposal_key)
+            first = True
+            keys = None
+            table = None
+            for report in reports:
+                if first:
+                    first = False
+                    rs_1.add_richtext("Reports:")
+                    table = rs_1.add_table()
+                    keys = report.data.keys()
+                    table.add_columns(*keys)
+                logger.info(f'Reports for {prop.proposal_key} -> {report.technology}!')
+                if table is not None:
+                    table.add_row(*[report.data.get(k) for k in keys])
+            reports.update(synced=True)
+
+            if not first:
+                rs_1.save()
+
     if len(call_list) > 0:
         Call.add_calls(*call_list)
         Call.call_done(max(call_list))

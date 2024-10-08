@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.12
 LABEL authors="martin"
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1

@@ -15,5 +15,5 @@ db_port=%(CHEMOTION_DB_PORT)s
 
 [proposal]
 url=%(PROPOSAL_URL)s
-user=%(PROPOSAL_USER)s
+user_name=%(PROPOSAL_USER)s
 password=%(PROPOSAL_PASSWORD)s

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ProposalMiner.iml" filepath="$PROJECT_DIR$/ProposalMiner.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../chemotionapi/.idea/chemotionapi.iml" filepath="$PROJECT_DIR$/../chemotionapi/.idea/chemotionapi.iml" />
     </modules>
   </component>
 </project>

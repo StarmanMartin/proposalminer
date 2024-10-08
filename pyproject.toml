@@ -15,7 +15,7 @@ beautifulsoup4 = "^4.12.3"
 pandas = "^2.2.3"
 xlrd = "^2.0.1"
 psycopg2 = "^2.9.9"
-chemotion-api = "^0.3.39"
+chemotion-api = "^0.3.40"
 pyperf = "^2.8.0"
 
 

@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-    image: mstarman/knmfproposalminer:0.1.5
+    image: mstarman/knmfproposalminer:0.1.7
     env_file:
       - ./.env
     ports:

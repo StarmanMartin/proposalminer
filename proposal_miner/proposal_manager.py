@@ -8,11 +8,10 @@ import math
 
 import requests
 from bs4 import BeautifulSoup
-from chemotion_api import ResearchPlan
-from pandas import read_excel, Timestamp
+from pandas import read_excel
 
 from orm.models import Call, Report
-from proposal_miner.utils import panda_json_serial
+from utils import panda_json_serial
 
 
 class ProposalManager:

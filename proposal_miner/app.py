@@ -16,12 +16,13 @@ from orm.models import Proposal, Call, Report
 from proposal_manager import ProposalManager
 
 FORMAT = '%(asctime)s %(message)s'
-log_dir = os.environ.get("LOG_DIR")
-if log_dir:
+log_dir = os.environ.get("LOG_DIR", './log_file.txt')
+if os.environ.get("MODE", 'DEBUG') != 'DEBUG':
     os.makedirs(os.path.dirname(log_dir), exist_ok=True)
     logging.basicConfig(level=logging.INFO, filename=log_dir, format=FORMAT)
 else:
-    logging.basicConfig(level=logging.DEBUG, handlers=[logging.StreamHandler()], format=FORMAT)
+    os.makedirs(os.path.dirname(log_dir), exist_ok=True)
+    logging.basicConfig(level=logging.DEBUG, handlers=[logging.FileHandler(log_dir), logging.StreamHandler()], format=FORMAT)
 logger = logging.getLogger(__name__)
 
 

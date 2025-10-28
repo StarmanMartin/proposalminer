@@ -28,7 +28,7 @@ RUN touch /var/log/cron.log
 #RUN echo "SHELL=/bin/bash" > /etc/cron.d/my_custom_cron
 #RUN echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/my_custom_cron
 
-RUN echo "*/1 * * * * bash -c '/srv/app/cron_entrypoint.sh' >> /var/log/cron.log 2>&1" > /etc/cron.d/my_custom_cron
+RUN echo "*/10 * * * * bash -c '/srv/app/cron_entrypoint.sh' >> /var/log/cron.log 2>&1" > /etc/cron.d/my_custom_cron
 
 RUN chmod 0644 /etc/cron.d/my_custom_cron
 RUN /usr/bin/crontab /etc/cron.d/my_custom_cron

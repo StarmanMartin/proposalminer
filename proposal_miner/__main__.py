@@ -4,7 +4,8 @@ from app import run
 from db_manager import run_django_cmd
 from orm.clean import clean_all
 
-if __name__ == '__main__':
+
+def run_cmd():
     if len(sys.argv) > 1:
         if sys.argv[1] == 'clean':
             fp = sys.argv[2] if len(sys.argv) > 2 else None
@@ -13,3 +14,7 @@ if __name__ == '__main__':
             run_django_cmd()
     else:
         run(config_path='../config.ini')
+
+
+if __name__ == '__main__':
+    run_cmd()

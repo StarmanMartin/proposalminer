@@ -1,4 +1,5 @@
 import logging
+import os
 
 from chemotion_api.elements.research_plan import ResearchPlan
 
@@ -7,6 +8,7 @@ from db_manager import setup
 setup()
 
 from chemotion_manager import Chemotion
+from chemotion_api.elements.research_plan import RichText
 from config_manager import Config
 
 from orm.models import Proposal, Call, Report
@@ -14,7 +16,12 @@ from orm.models import Proposal, Call, Report
 from proposal_manager import ProposalManager
 
 FORMAT = '%(asctime)s %(message)s'
-logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler()], format=FORMAT)
+log_dir = os.environ.get("LOG_DIR")
+if log_dir:
+    os.makedirs(os.path.dirname(log_dir), exist_ok=True)
+    logging.basicConfig(level=logging.INFO, filename=log_dir, format=FORMAT)
+else:
+    logging.basicConfig(level=logging.DEBUG, handlers=[logging.StreamHandler()], format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
@@ -43,13 +50,11 @@ def run(config_path: str):
             # emails += ['martin.starman@kit.edu']
             user = chemotion.get_all_user()
             user = [user[email] for email in emails if email in user]
-            logger.info('Selected user: [%s]', ','.join([str(x) for x in user]))
+            logger.info('Selected user: [%s]', ','.join([f"{p.name} <{p.email}>" for p in user]))
             if len(user) > 0:
-                group = chemotion.next_group(prop.name, prop.proposal_key)
-                group.add_users_by_id(*user)
-                prop.group = group.id
-                logger.info('New group: [%s]', str(group.id))
-                col = chemotion.new_collection(group, prop.proposal_key)
+
+                logger.info('Create shared collection')
+                col = chemotion.new_collection(user, prop.proposal_key)
                 rs_1: ResearchPlan = col.new_research_plan()
                 rs_1.name = prop_data['title']
                 rs_1.add_richtext(f'Keywords: {prop_data["keywords"]}')
@@ -72,15 +77,32 @@ def run(config_path: str):
         if prop.research_plan is not None:
             rs_1 = chemotion.get_rp(prop)
             reports = Report.objects.filter(synced=False, proposal_id=prop.proposal_key)
-            first = True
+            first = prop.research_plan_status_table is None
             keys = None
-            table = None
+            t_idx, table = next(((i, x) for i, x in enumerate(rs_1.body) if x['id'] == prop.research_plan_status_table),
+                                (len(rs_1.body), None))
+            if table is None:
+                table = rs_1.add_table()
+                prop.research_plan_status_table = table['id']
+                prop.save()
+
             for report in reports:
                 if first:
                     first = False
-                    rs_1.add_richtext("Reports:")
-                    table = rs_1.add_table()
-                    keys = report.data.keys()
+                    rt = rs_1.add_richtext(at_idx=t_idx)
+                    rt.add_text("Reports:\n", header=RichText.HeaderType.H2)
+                    rt = rs_1.add_richtext(at_idx=1)
+                    rt.add_text(f"Proposal ID:", bold=True).add_text(f"{report.data.get('Proposal ID')}\n",
+                                                                     list='bullet')
+                    rt.add_text(f"Proposal Type:", bold=True).add_text(f"{report.data.get('Proposal Type')}\n",
+                                                                       list='bullet')
+                    rt.add_text(f"Start date (scheduled):", bold=True).add_text(
+                        f"{report.data.get('Start date (scheduled)')}\n", list='bullet')
+                    rt.add_text(f"End date (scheduled):", bold=True).add_text(
+                        f"{report.data.get('End date (scheduled)')}\n", list='bullet')
+
+                    keys = [x for x in report.data.keys() if
+                            x not in ['Proposal ID', 'Proposal Type', 'Start date (scheduled)', 'End date (scheduled)']]
                     table.add_columns(*keys)
                 logger.info(f'Reports for {prop.proposal_key} -> {report.technology}!')
                 if table is not None:

@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.13-slim
 LABEL authors="martin"
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -8,7 +8,7 @@ RUN mkdir -p /srv/app
 
 WORKDIR /srv/app
 
-RUN apt-get update && apt-get install -y cron nano
+RUN apt-get update && apt-get install -y cron nano libmagic1
 
 # install dependencies
 COPY requirements.txt .

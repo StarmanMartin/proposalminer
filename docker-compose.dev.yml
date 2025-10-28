@@ -1,6 +1,5 @@
-version: '3'
 services:
-  web:
+  knmfproposalminer:
     build:
       context: .
     image: mstarman/knmfproposalminer:0.1.7

@@ -1,22 +1,25 @@
 [tool.poetry]
 name = "proposalminer"
-version = "0.1.0"
+version = "0.1.7"
 description = ""
 authors = ["martin <m.starman@live.com>"]
 readme = "README.md"
 
-packages = [{include = "chemotion_api"}]
+packages = [{include = "proposal_miner"}]
+
+[tool.poetry.scripts]
+chemotion_api = "proposal_miner.__main__:run_cmd"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 requests = "^2.32.3"
-django = "^5.0.6"
-beautifulsoup4 = "^4.12.3"
+django = "^5.0.13"
+beautifulsoup4 = "4.13.3"
 pandas = "^2.2.3"
 xlrd = "^2.0.1"
-psycopg2 = "^2.9.9"
-chemotion-api = "^0.3.40"
-pyperf = "^2.8.0"
+chemotion-api = "^0.4.2"
+pyperf = "2.9.0"
+psycopg2-binary = "^2.9.10"
 
 
 [build-system]

@@ -8,6 +8,7 @@ class Proposal(models.Model):
     group = models.IntegerField(null=True, default=None)
     collection = models.IntegerField(null=True, default=None)
     research_plan = models.IntegerField(null=True, default=None)
+    research_plan_status_table = models.CharField(max_length=255, null=True, default=None)
 
 
 class Report(models.Model):

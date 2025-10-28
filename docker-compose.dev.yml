@@ -2,7 +2,7 @@ services:
   knmfproposalminer:
     build:
       context: .
-    image: mstarman/knmfproposalminer:0.1.8
+    image: mstarman/knmfproposalminer:0.1.9
     env_file:
       - ./.env
     ports:
